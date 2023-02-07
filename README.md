@@ -3,4 +3,4 @@
 
 执行命令
 
-python3.9 data-gen-v2.py --config ./config.toml -o ./data-car --temp ./shm --boostx-binary ./boostx --seed /etc/passwd --total 5
+python3.9 data-gen-v2.py --config ./config.toml  --temp ./shm --boostx-binary ./boostx --seed /etc/passwd --total 5
