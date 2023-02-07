@@ -314,8 +314,10 @@ def main():
                 time_left.add_elapsed(elapsed)
                 idx = carfile.index
                 idx -= 1
+                output_qn = config['output_qn']
+                output_qn_file =  output_qn + "/" + carfile.commp_cid + '.car'
                 files[idx]['status'] = 'done'
-                files[idx]['fullpath'] = str(carfile.fullpath)
+                files[idx]['fullpath'] = output_qn_file
                 files[idx]['filename'] = carfile.filename
                 files[idx]['payloadCid'] = carfile.payload_cid
                 files[idx]['commpCid'] = carfile.commp_cid
@@ -323,18 +325,17 @@ def main():
                 files[idx]['carSize'] = carfile.car_size
                 files[idx]['seed'] = carfile.seed
                 output = config['output']
-                output_qn = config['output_qn']
-                LOG.info("正在进行重命名：{} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
-                LOG.info("输出目录：",output)
-                LOG.info("七牛云目录：",output_qn)
+                LOG.info("file rename  {} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
+                LOG.info("output_dir:{}".format(output))
+                LOG.info("qny_dir:{}".format(output_qn))
                 os.rename("{}".format(str(carfile.fullpath)),"{}/{}.car".format(output,carfile.commp_cid))
                 #copy car文件到七牛
                 shutil.copy("{}/{}.car".format(output,carfile.commp_cid),output_qn)
                 status = filecmp.cmp("{}/{}.car".format(output,carfile.commp_cid),"{}/{}.car".format(output_qn,carfile.commp_cid))
                 if status:
-                    LOG.info("copy 成功 准备删除{}/{}.car".format(output,carfile.commp_cid))
+                    LOG.info("copy Success  delete {}/{}.car".format(output,carfile.commp_cid))
                     os.remove("{}/{}.car".format(output,carfile.commp_cid))
-                    LOG.info("文件copy成功 {}/{}.car ==> {}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
+                    LOG.info("document copy Success  {}/{}.car ==> {}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
                 else:
                     LOG.info("copy files error !!! {}/{}.car ==>{}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
                     continue
