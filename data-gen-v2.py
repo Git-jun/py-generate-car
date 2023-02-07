@@ -73,10 +73,14 @@ def process(conf, file, output_queue):
     dest_file = pathlib.Path(output, '%s.car' % filename)
     output_path = dest_file.parent
     state_folder = dest_file.parent / 'state'
+    print(state_folder)
     state_file = state_folder / dest_file.name
-    if not output_path.exists():
+    #if not output_path.exists():
+    if not os.path.exists(str(output_path)):
         os.mkdir(output_path)
-    if not state_folder.exists():
+    #if not state_folder.exists():
+    if not os.path.exists(str(state_folder)):
+        print('报错报错99999999999999999')
         os.mkdir(state_folder)
     start = time.time()
     try:
@@ -318,11 +322,13 @@ def main():
                 files[idx]['pieceSize'] = carfile.piece_size
                 files[idx]['carSize'] = carfile.car_size
                 files[idx]['seed'] = carfile.seed
-                print("正在进行重命名：{} ==> /opt/raid0/python3/data-car/{}.car".format(str(carfile.fullpath),carfile.commp_cid))
-                os.rename("{}".format(str(carfile.fullpath)),"/opt/raid0/python3/data-car/{}.car".format(carfile.commp_cid))
+                output = config['output']
+                print("正在进行重命名：{} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
+                print("输出目录：",output)
+                os.rename("{}".format(str(carfile.fullpath)),"{}/{}.car".format(output,carfile.commp_cid))
                 task_left = total - done - failed
                 save_config(conf, config)
-                LOG.info("file rename  Success {} ==> /opt/raid0/python3/data-car/{}.car".format(str(carfile.fullpath),carfile.commp_cid))
+                LOG.info("file rename  Success {} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
                 LOG.info("Success %d/%d/%d took: %s, eta: %s, %s",
                          done, failed, total,
                          human_seconds(elapsed),
