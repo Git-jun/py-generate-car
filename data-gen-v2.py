@@ -73,7 +73,6 @@ def process(conf, file, output_queue):
     dest_file = pathlib.Path(output, '%s.car' % filename)
     output_path = dest_file.parent
     state_folder = dest_file.parent / 'state'
-    print(state_folder)
     state_file = state_folder / dest_file.name
     #if not output_path.exists():
     if not os.path.exists(str(output_path)):
