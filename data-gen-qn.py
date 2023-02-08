@@ -62,13 +62,15 @@ CarFile = collections.namedtuple('CarFile', ['index', 'fullpath', 'filename', 'p
 def zip_p():
     pass
 
-def process(conf, file, output_queue):
+def process(conf, file, output_queue,config):
     if conf.dry_run:
         return
     output = output_queue.get()
-
     index = file['index']
     seed = file['seed']
+    output_a = config['output']
+    output_qn = config['output_qn'] 
+    print(output_a,output_qn)
     filename = '%05d' % index
     src_file = pathlib.Path(conf.temp, filename)
     dest_file = pathlib.Path(output, '%s.car' % filename)
@@ -116,6 +118,22 @@ def process(conf, file, output_queue):
         car_size = data['Car file size']
         carfile = CarFile(index, dest_file, filename, payload_cid,
                           commp_cid, piece_size, car_size, seed)
+        output = config['output']
+        output_qn = config['output_qn']
+        LOG.info("file rename  {} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
+        LOG.info("output_dir:{}".format(output))
+        LOG.info("qny_dir:{}".format(output_qn))
+        os.rename("{}".format(str(carfile.fullpath)),"{}/{}.car".format(output,carfile.commp_cid))
+        LOG.info("file rename  Success {} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
+        #copy car文件到七牛
+        shutil.copy("{}/{}.car".format(output,carfile.commp_cid),output_qn)
+        status = filecmp.cmp("{}/{}.car".format(output,carfile.commp_cid),"{}/{}.car".format(output_qn,carfile.commp_cid))
+        if status:
+            LOG.info("copy Success  delete {}/{}.car".format(output,carfile.commp_cid))
+            os.remove("{}/{}.car".format(output,carfile.commp_cid))
+            LOG.info("document copy Success  {}/{}.car ==> {}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
+        else:
+            LOG.info("copy files error !!! {}/{}.car ==>{}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
         # save the state file
         with open(state_file, 'w') as f:
             data = {
@@ -299,7 +317,7 @@ def main():
         else:
             LOG.debug("Need genearte file %s", file)
         tasks.append(exector.submit(
-            TimeTrack(process), conf, file, output_queue))
+            TimeTrack(process), conf, file, output_queue,config))
 
     total = len(tasks)
     done = failed = 0
@@ -324,24 +342,24 @@ def main():
                 files[idx]['pieceSize'] = carfile.piece_size
                 files[idx]['carSize'] = carfile.car_size
                 files[idx]['seed'] = carfile.seed
-                output = config['output']
-                LOG.info("file rename  {} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
-                LOG.info("output_dir:{}".format(output))
-                LOG.info("qny_dir:{}".format(output_qn))
-                os.rename("{}".format(str(carfile.fullpath)),"{}/{}.car".format(output,carfile.commp_cid))
+                #output = config['output']
+                #LOG.info("file rename  {} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
+                #LOG.info("output_dir:{}".format(output))
+                #LOG.info("qny_dir:{}".format(output_qn))
+                #os.rename("{}".format(str(carfile.fullpath)),"{}/{}.car".format(output,carfile.commp_cid))
                 #copy car文件到七牛
-                shutil.copy("{}/{}.car".format(output,carfile.commp_cid),output_qn)
-                status = filecmp.cmp("{}/{}.car".format(output,carfile.commp_cid),"{}/{}.car".format(output_qn,carfile.commp_cid))
-                if status:
-                    LOG.info("copy Success  delete {}/{}.car".format(output,carfile.commp_cid))
-                    os.remove("{}/{}.car".format(output,carfile.commp_cid))
-                    LOG.info("document copy Success  {}/{}.car ==> {}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
-                else:
-                    LOG.info("copy files error !!! {}/{}.car ==>{}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
-                    continue
+                #shutil.copy("{}/{}.car".format(output,carfile.commp_cid),output_qn)
+                #status = filecmp.cmp("{}/{}.car".format(output,carfile.commp_cid),"{}/{}.car".format(output_qn,carfile.commp_cid))
+                #if status:
+                #    LOG.info("copy Success  delete {}/{}.car".format(output,carfile.commp_cid))
+                #    os.remove("{}/{}.car".format(output,carfile.commp_cid))
+                #    LOG.info("document copy Success  {}/{}.car ==> {}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
+                #else:
+                #    LOG.info("copy files error !!! {}/{}.car ==>{}/{}.car".format(output,carfile.commp_cid,output_qn,carfile.commp_cid))
+                #    continue
                 task_left = total - done - failed
                 save_config(conf, config)
-                LOG.info("file rename  Success {} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
+                #LOG.info("file rename  Success {} ==> {}/{}.car".format(str(carfile.fullpath),output,carfile.commp_cid))
                 LOG.info("Success %d/%d/%d took: %s, eta: %s, %s",
                          done, failed, total,
                          human_seconds(elapsed),
