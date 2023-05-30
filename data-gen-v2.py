@@ -88,7 +88,7 @@ def process(conf, file, output_queue):
                  filename, int(time.time() - start))
         start = time.time()
         #加密代码
-        cmd_zip = "zip -P '14z^psC^iTzPUEs#cZdMuMWabVY&&NKE@IEoJGXl152WpFhcFuRDjCM&Aq5VZFS*&' -0 {}.zip {}".format(src_file,src_file)
+        cmd_zip = "zip -P 'nbjshdbjkahbhjgasdkhj' -0 {}.zip {}".format(src_file,src_file)
         if_zip = os.system(cmd_zip)
         print(if_zip)
         zip_path = "{}.zip".format(src_file)
